@@ -20,7 +20,7 @@ import java.util.List;
 
 public class login extends Activity implements View.OnClickListener {
     private EditText user, pass;
-    private Button bLogin;
+    private Button bLogin, bSignUp;
     // Progress Dialog
     private ProgressDialog pDialog;
     //JSON parser class
@@ -34,9 +34,12 @@ public class login extends Activity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
         user = (EditText) findViewById(R.id.edtuserid);
-        pass = (EditText) findViewById(R.id.edtpass);
+        pass = (EditText) findViewById(R.id.edtrpass);
         bLogin = (Button) findViewById(R.id.btLogin);
+        bSignUp = (Button) findViewById(R.id.btSignUp);
         bLogin.setOnClickListener(this);
+        bSignUp.setOnClickListener(this);
+
     }
 
     @Override public void onClick(View v) {
@@ -46,7 +49,10 @@ public class login extends Activity implements View.OnClickListener {
                 String username = user.getText().toString();
                 String password = pass.getText().toString();
                 new AttemptLogin().execute(username, password); // here we have used, switch case, because on login activity you may //also want to show registration button, so if the user is new ! we can go the //registration activity , other than this we could also do this without switch //case.
-            default: break;
+            break;
+            case R.id.btSignUp:
+                startActivity(new Intent(login.this, signup.class));
+            break;
         }
     }
 
@@ -55,7 +61,7 @@ public class login extends Activity implements View.OnClickListener {
     boolean failure = false;@Override protected void onPreExecute() {
         super.onPreExecute();
         pDialog = new ProgressDialog(login.this);
-        pDialog.setMessage("Attempting for login...");
+        pDialog.setMessage("Attempting to login...");
         pDialog.setIndeterminate(false);
         pDialog.setCancelable(true);
         pDialog.show();
@@ -73,7 +79,7 @@ public class login extends Activity implements View.OnClickListener {
                 success = json.getInt(TAG_SUCCESS);
                 if (success == 1) {
                     Log.d("Successfully Login!", json.toString());
-                    Intent ii = new Intent(login.this, main_activity.class);
+                    startActivity(new Intent(login.this, main_activity.class));
                     finish(); // this finish() method is used to tell android os that we are done with current //activity now! Moving to other activity startActivity(ii);
                     return json.getString(TAG_MESSAGE);
                 } else {
