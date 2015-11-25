@@ -22,8 +22,11 @@
             android:name=".signup"
             android:label="@string/title_activity_signup" >
         </activity>
+        <activity android:name=".main_activity" >
+        </activity>
         <activity
-            android:name=".main_activity" >
+            android:name=".CreateEvent"
+            android:label="@string/title_activity_create_event" >
         </activity>
     </application>
 

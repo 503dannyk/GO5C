@@ -16,11 +16,16 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
+import android.content.SharedPreferences;
+import android.content.Context;
+import android.widget.CheckBox;
+import android.view.inputmethod.InputMethodManager;
 
 //hello
 public class login extends Activity implements View.OnClickListener {
     private EditText user, pass;
     private Button bLogin, bSignUp;
+    private CheckBox saveLoginCheckBox;
     // Progress Dialog
     private ProgressDialog pDialog;
     //JSON parser class
@@ -28,6 +33,11 @@ public class login extends Activity implements View.OnClickListener {
     private static final String LOGIN_URL = "http://10.0.2.2/5CGO/login.php";
     private static final String TAG_SUCCESS = "success";
     private static final String TAG_MESSAGE = "message";
+    String username, password;
+    private SharedPreferences loginPreferences;
+    private SharedPreferences.Editor loginPrefsEditor;
+    private Boolean saveLogin;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +49,16 @@ public class login extends Activity implements View.OnClickListener {
         bSignUp = (Button) findViewById(R.id.btSignUp);
         bLogin.setOnClickListener(this);
         bSignUp.setOnClickListener(this);
+        saveLoginCheckBox = (CheckBox)findViewById(R.id.saveLoginCheckBox);
+        loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+        loginPrefsEditor = loginPreferences.edit();
+
+        saveLogin = loginPreferences.getBoolean("saveLogin", false);
+        if (saveLogin == true) {
+            user.setText(loginPreferences.getString("username", ""));
+            pass.setText(loginPreferences.getString("password", ""));
+            saveLoginCheckBox.setChecked(true);
+        }
 
     }
 
@@ -46,9 +66,21 @@ public class login extends Activity implements View.OnClickListener {
         // TODO Auto-generated method
         switch (v.getId()) {
             case R.id.btLogin:
-                String username = user.getText().toString();
-                String password = pass.getText().toString();
-                new AttemptLogin().execute(username, password); // here we have used, switch case, because on login activity you may //also want to show registration button, so if the user is new ! we can go the //registration activity , other than this we could also do this without switch //case.
+                InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);
+                imm.hideSoftInputFromWindow(user.getWindowToken(), 0);
+                username = user.getText().toString();
+                password = pass.getText().toString();
+                if (saveLoginCheckBox.isChecked()) {
+                    loginPrefsEditor.putBoolean("saveLogin", true);
+                    loginPrefsEditor.putString("username", username);
+                    loginPrefsEditor.putString("password", password);
+                    loginPrefsEditor.commit();
+                } else {
+                    loginPrefsEditor.clear();
+                    loginPrefsEditor.commit();
+                }
+                new AttemptLogin().execute(username, password);
+                // here we have used, switch case, because on login activity you may //also want to show registration button, so if the user is new ! we can go the //registration activity , other than this we could also do this without switch //case.
             break;
             case R.id.btSignUp:
                 startActivity(new Intent(login.this, signup.class));
