@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import org.apache.http.NameValuePair;
+import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -13,6 +14,7 @@ import org.json.JSONObject;
 import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -26,7 +28,7 @@ import android.widget.ListView;
 import android.widget.SimpleAdapter;
 import android.widget.TextView;
 
-public class main_activity extends ListActivity implements View.OnClickListener {
+public class eventsHosting extends ListActivity implements View.OnClickListener {
     // Progress Dialog
     private ProgressDialog pDialog;
 
@@ -36,7 +38,7 @@ public class main_activity extends ListActivity implements View.OnClickListener 
     ArrayList<HashMap<String, String>> eventsList;
 
     // url to get all events list
-    private static final String url_all_events = "http://10.0.2.2/5CGO/GetAllEvents.php";
+    private static final String url_events_hosting = "http://10.0.2.2/5CGO/eventsHosting.php";
 
     // JSON Node names
     private static final String TAG_SUCCESS = "success";
@@ -45,9 +47,10 @@ public class main_activity extends ListActivity implements View.OnClickListener 
     private static final String TAG_NAME = "title";
     private static final String TAG_DATEOF = "dateof";
     private static final String TAG_LOCATION = "location";
+    private SharedPreferences loginPreferences;
+    String username;
     //  private static final String TAG_HOST = "host";
 
-    private Button createEvent, profile;
 
     // events JSONArray
     JSONArray events = null;
@@ -56,18 +59,17 @@ public class main_activity extends ListActivity implements View.OnClickListener 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.main_activity);
-        createEvent= (Button) findViewById(R.id.createEventbt);
-        createEvent.setOnClickListener(this);
-        profile = (Button) findViewById(R.id.ProfileButton);
-        profile.setOnClickListener(this);
+        setContentView(R.layout.activity_events_hosting);
 
         // Hashmap for ListView
         eventsList = new ArrayList<HashMap<String, String>>();
+        loginPreferences = getSharedPreferences("loginPrefs", MODE_PRIVATE);
+        username = loginPreferences.getString("username", "");
+        Log.d("username: ",username);
 
 
         // Loading products in Background Thread
-        new LoadAllEvents().execute();
+        new LoadAllEvents2().execute(username);
 
         // Get listview
         ListView lv = getListView();
@@ -118,7 +120,7 @@ public class main_activity extends ListActivity implements View.OnClickListener 
     /**
      * Background Async Task to Load all product by making HTTP Request
      * */
-    class LoadAllEvents extends AsyncTask<String, String, String> {
+    class LoadAllEvents2 extends AsyncTask<String, String, String> {
 
         /**
          * Before starting background thread Show Progress Dialog
@@ -126,7 +128,7 @@ public class main_activity extends ListActivity implements View.OnClickListener 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            pDialog = new ProgressDialog(main_activity.this);
+            pDialog = new ProgressDialog(eventsHosting.this);
             pDialog.setMessage("Loading events. Please wait...");
             pDialog.setIndeterminate(false);
             pDialog.setCancelable(false);
@@ -139,8 +141,10 @@ public class main_activity extends ListActivity implements View.OnClickListener 
         protected String doInBackground(String... args) {
             // Building Parameters
             List<NameValuePair> params = new ArrayList<NameValuePair>();
+            params.add(new BasicNameValuePair("username", args[0]));
+
             // getting JSON string from URL
-            JSONObject json = jParser.makeHttpRequest(url_all_events, "GET", params);
+            JSONObject json = jParser.makeHttpRequest(url_events_hosting, "GET", params);
 
             // Check your log cat for JSON reponse
             Log.d("All Events: ", json.toString());
@@ -180,7 +184,7 @@ public class main_activity extends ListActivity implements View.OnClickListener 
                     // no events found
                     // ***************Launch Add New product Activity*******************
                     Intent i = new Intent(getApplicationContext(),
-                            login.class);
+                            profile.class);
                     // Closing all previous activities
                     i.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                     startActivity(i);
@@ -205,7 +209,7 @@ public class main_activity extends ListActivity implements View.OnClickListener 
                      * Updating parsed JSON data into ListView
                      * */
                     ListAdapter adapter = new SimpleAdapter(
-                            main_activity.this, eventsList,
+                            eventsHosting.this, eventsList,
                             R.layout.events_info, new String[] { TAG_EID,
                             TAG_NAME, TAG_DATEOF, TAG_LOCATION},
                             new int[] { R.id.eid, R.id.title, R.id.dateof, R.id.location});
@@ -220,15 +224,5 @@ public class main_activity extends ListActivity implements View.OnClickListener 
 
     @Override public void onClick(View v) {
         // TODO Auto-generated method
-        switch (v.getId()) {
-            case R.id.createEventbt:
-                startActivity(new Intent(main_activity.this, CreateEvent.class));
-                break;
-            case R.id.ProfileButton:
-                startActivity(new Intent(main_activity.this, profile.class));
-                break;
-
-
-        }
     }
 }

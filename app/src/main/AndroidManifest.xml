@@ -15,6 +15,7 @@
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -27,6 +28,18 @@
         <activity
             android:name=".CreateEvent"
             android:label="@string/title_activity_create_event" >
+        </activity>
+        <activity
+            android:name=".profile"
+            android:label="@string/title_activity_profile" >
+        </activity>
+        <activity
+            android:name=".eventsAttending"
+            android:label="@string/title_activity_events_attending" >
+        </activity>
+        <activity
+            android:name=".eventsHosting"
+            android:label="@string/title_activity_events_hosting" >
         </activity>
     </application>
 
